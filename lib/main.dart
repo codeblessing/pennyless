@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:pennyless/map.dart';
+import 'package:pennyless/data/price_data.dart';
+import 'package:pennyless/pages/account_page.dart';
+import 'package:pennyless/pages/edit_prices_page.dart';
+import 'package:pennyless/pages/login_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
-void main() {
-  runApp(MyApp());
+import 'data/station.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://hwebjzubjvvhmphtzpgo.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3ZWJqenVianZ2aG1waHR6cGdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTY4NDc1MzMsImV4cCI6MTk3MjQyMzUzM30.5aAxuwjTkCpA5zm8cf5UzbVh2VcbtDNJxhD3ryyJCdQ',
+  );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final List<LatLng> _markers = [
-    LatLng(52.4006553, 16.7615825),
-    LatLng(52.4008000, 16.7615825),
-    LatLng(52.5006570, 16.7615824)
-  ];
-
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -32,95 +41,95 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      home: StationMap(
-        markers: _markers,
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have clicked the button this many times:',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Edit prices')),
+        body: Center(
+          child: EditPricePage(
+            current_prices: PriceData(
+              Station(
+                const Uuid(),
+                "BP Poznańska",
+                LatLng(52.4006553, 16.7615825),
+              ),
+              7.98,
+              7.80,
+              7.70,
+              5.20,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // initialRoute: "/login",
+      // routes: <String, WidgetBuilder>{
+      //   '/login': (_) => const LoginPage(),
+      //   '/account': (_) => const AccountPage(),
+      // },
     );
   }
 }
+
+// class MyHomePage extends StatefulWidget {
+//   const MyHomePage({Key? key, required this.title}) : super(key: key);
+
+//   // This widget is the home page of your application. It is stateful, meaning
+//   // that it has a State object (defined below) that contains fields that affect
+//   // how it looks.
+
+//   // This class is the configuration for the state. It holds the values (in this
+//   // case the title) provided by the parent (in this case the App widget) and
+//   // used by the build method of the State. Fields in a Widget subclass are
+//   // always marked "final".
+
+//   final String title;
+
+//   @override
+//   State<MyHomePage> createState() => _MyHomePageState();
+// }
+
+// class _MyHomePageState extends State<MyHomePage> {
+//   final List<PriceData> _markers = [
+//     PriceData(
+//       Station(
+//         const Uuid(),
+//         "BP Poznańska",
+//         LatLng(52.4006553, 16.7615825),
+//       ),
+//       7.98,
+//       7.80,
+//       7.70,
+//       5.20,
+//     ),
+//     PriceData(
+//       Station(
+//         const Uuid(),
+//         "Orlen Krakowska",
+//         LatLng(52.5006570, 16.7615824),
+//       ),
+//       6.15,
+//       5.00,
+//       4.70,
+//       5.10,
+//     ),
+//   ];
+//   PriceData currentPrices = PriceData.empty();
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       children: [
+//         StationMap(
+//           markers: _markers,
+//           onPinTap: (prices) => setState(() => currentPrices = prices),
+//         ),
+//         BottomDrawer(
+//           header: Container(),
+//           body: PriceScreen(
+//             prices: currentPrices,
+//           ),
+//           headerHeight: 10.0,
+//           drawerHeight: 400.0,
+//         ),
+//       ],
+//     );
+//   }
+// }

@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:pennyless/data/price_data.dart';
 
 class StationMap extends StatelessWidget {
-  final List<LatLng> markers;
+  final List<PriceData> markers;
   final LatLng? center;
+  Function(PriceData) onPinTap;
 
-  const StationMap({required this.markers, this.center, Key? key})
+  StationMap(
+      {required this.markers, required this.onPinTap, this.center, Key? key})
       : super(key: key);
 
   @override
@@ -24,8 +27,11 @@ class StationMap extends StatelessWidget {
         MarkerLayerOptions(
             markers: markers
                 .map((point) => Marker(
-                    point: point,
-                    builder: (_) => const Icon(CupertinoIcons.map_pin)))
+                    point: point.station.coords,
+                    builder: (_) => GestureDetector(
+                          child: Icon(CupertinoIcons.map_pin),
+                          onTap: () => onPinTap(point),
+                        )))
                 .toList()),
       ],
       nonRotatedChildren: [
