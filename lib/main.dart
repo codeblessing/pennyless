@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pennyless/pages/account_page.dart';
+import 'package:pennyless/pages/add_page.dart';
 import 'package:pennyless/pages/edit_prices_page.dart';
 import 'package:pennyless/pages/login_page.dart';
 import 'package:pennyless/pages/map_page.dart';
@@ -46,9 +47,8 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/': (_) => MapPage(),
         '/prices': (_) => const PricesPage(),
-        '/login': (_) => const LoginPage(),
-        '/account': (_) => const AccountPage(),
         '/edit_prices': (_) => const EditPricePage(),
+        '/add': (_) => const AddPage(),
       },
     );
   }

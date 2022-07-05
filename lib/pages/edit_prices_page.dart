@@ -21,7 +21,7 @@ class _EditPricePageState extends State<EditPricePage> {
     'LPG': TextEditingController(),
   };
 
-  late final String id;
+  late String id;
 
   Future<void> _submit() async {
     var prices = {

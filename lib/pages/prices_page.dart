@@ -16,7 +16,11 @@ class PricesPage extends StatelessWidget {
     final prices = Database().prices[id] ?? Prices(id, 0.0, 0.0, 0.0, 0.0);
 
     return Scaffold(
-      appBar: AppBar(title: Text(name)),
+      appBar: AppBar(title: Text(name), actions: [
+        GestureDetector(
+            onTap: () => Navigator.of(context).pushNamed('/'),
+            child: const Icon(Icons.map))
+      ]),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(

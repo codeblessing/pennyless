@@ -44,6 +44,21 @@ class MapPage extends StatelessWidget {
           attributionBuilder: _buildAttributionWidget,
           alignment: Alignment.bottomRight,
         ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SizedBox(
+                width: 80.0,
+                height: 80.0,
+                child: FittedBox(
+                  child: FloatingActionButton(
+                    onPressed: () => Navigator.of(context).pushNamed('/add'),
+                    child: const Icon(Icons.add),
+                  ),
+                ),
+              )),
+        )
       ],
     );
   }
