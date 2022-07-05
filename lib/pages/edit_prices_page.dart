@@ -1,83 +1,131 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:flutter/material.dart';
-import 'package:pennyless/data/price_data.dart';
+import 'package:flutter/services.dart';
+import 'package:pennyless/data/prices.dart';
+import 'package:pennyless/database.dart';
 import 'package:pennyless/ext/utils/constants.dart';
 
 class EditPricePage extends StatefulWidget {
-  final PriceData current_prices;
-  const EditPricePage({required this.current_prices, Key? key})
-      : super(key: key);
+  const EditPricePage({Key? key}) : super(key: key);
 
   @override
-  State<EditPricePage> createState() => _EditPricePageState(current_prices);
+  State<EditPricePage> createState() => _EditPricePageState();
 }
 
 class _EditPricePageState extends State<EditPricePage> {
-  final TextEditingController _ONPriceController;
-  final TextEditingController _PB98PriceController;
-  final TextEditingController _PB95PriceController;
-  final TextEditingController _LPGPriceController;
+  final controllers = {
+    'ON': TextEditingController(),
+    'PB98': TextEditingController(),
+    'PB95': TextEditingController(),
+    'LPG': TextEditingController(),
+  };
 
-  _EditPricePageState(PriceData current)
-      : _ONPriceController = TextEditingController(text: current.ON.toString()),
-        _PB98PriceController =
-            TextEditingController(text: current.PB98.toString()),
-        _PB95PriceController =
-            TextEditingController(text: current.PB95.toString()),
-        _LPGPriceController =
-            TextEditingController(text: current.LPG.toString());
+  late final String id;
 
   Future<void> _submit() async {
     var prices = {
-      "ON": double.tryParse(_ONPriceController.text),
-      "PB98": double.tryParse(_PB98PriceController.text),
-      "PB95": double.tryParse(_PB95PriceController.text),
-      "LPG": double.tryParse(_LPGPriceController.text),
+      "id": id,
+      "ON": double.tryParse(controllers['ON']!.text),
+      "PB98": double.tryParse(controllers['PB98']!.text),
+      "PB95": double.tryParse(controllers['PB95']!.text),
+      "LPG": double.tryParse(controllers['LPG']!.text),
     };
     var result = await supabase.from('prices').upsert(prices).execute();
-    if (mounted && result.error != null) {
-      context.showErrorSnackBar(message: "Cannot set prices");
+    await Database().fetch();
+
+    if (mounted) {
+      if (result.error != null) {
+        context.showErrorSnackBar(message: "Cannot set prices");
+      } else {
+        Navigator.of(context).popAndPushNamed('/prices', arguments: id);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-          minWidth: 200.0, maxWidth: 400.0, minHeight: 200.0, maxHeight: 500.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: Form(
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _ONPriceController,
-                decoration: const InputDecoration(labelText: 'ON price'),
+    final prices = ModalRoute.of(context)?.settings.arguments as Prices;
+    id = prices.station_id;
+
+    controllers['ON']!.text = prices.ON.toString();
+    controllers['PB98']!.text = prices.PB98.toString();
+    controllers['PB95']!.text = prices.PB95.toString();
+    controllers['LPG']!.text = prices.LPG.toString();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit prices')),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 200.0,
+            maxWidth: 400.0,
+            minHeight: 200.0,
+            maxHeight: 500.0,
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            child: Form(
+              child: Column(
+                children: [
+                  EditPriceField(
+                    controller: controllers['ON']!,
+                    label: "ON price",
+                  ),
+                  EditPriceField(
+                    controller: controllers['PB98']!,
+                    label: 'Pb 98 price',
+                  ),
+                  EditPriceField(
+                    controller: controllers['PB95']!,
+                    label: 'Pb 95 price',
+                  ),
+                  EditPriceField(
+                    controller: controllers['LPG']!,
+                    label: 'LPG price',
+                  ),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 5.0)),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text("Submit"),
+                    ),
+                  )
+                ],
               ),
-              TextFormField(
-                controller: _PB98PriceController,
-                decoration: const InputDecoration(labelText: 'Pb 98 price'),
-              ),
-              TextFormField(
-                controller: _PB95PriceController,
-                decoration: const InputDecoration(labelText: 'Pb 95 price'),
-              ),
-              TextFormField(
-                controller: _LPGPriceController,
-                decoration: const InputDecoration(labelText: 'LPG price'),
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 5.0)),
-              ElevatedButton(
-                  onPressed: _submit,
-                  child: const Padding(
-                    padding: EdgeInsets.all(5.0),
-                    child: Text("Submit"),
-                  ))
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class EditPriceField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+
+  const EditPriceField({
+    Key? key,
+    required this.controller,
+    required this.label,
+  }) : super(key: key);
+
+  double value() => double.tryParse(controller.text) ?? 0.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(
+          RegExp(r'[0-9.]'),
+        )
+      ],
     );
   }
 }

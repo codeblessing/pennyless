@@ -1,23 +1,26 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:pennyless/data/price_data.dart';
+import 'package:pennyless/database.dart';
 
-class StationMap extends StatelessWidget {
-  final List<PriceData> markers;
+import '../data/station.dart';
+
+class MapPage extends StatelessWidget {
+  final List<Station> markers = Database().stations.values.toList();
   final LatLng? center;
-  Function(PriceData) onPinTap;
 
-  StationMap(
-      {required this.markers, required this.onPinTap, this.center, Key? key})
-      : super(key: key);
+  MapPage({
+    this.center,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        center: center ?? LatLng(52.4006553, 16.7615825),
-        zoom: 10,
+        center: center ?? LatLng(52.3962703, 16.9530903),
+        zoom: 13.5,
       ),
       layers: [
         TileLayerOptions(
@@ -26,11 +29,13 @@ class StationMap extends StatelessWidget {
         ),
         MarkerLayerOptions(
             markers: markers
-                .map((point) => Marker(
-                    point: point.station.coords,
+                .map((station) => Marker(
+                    point: station.coords,
                     builder: (_) => GestureDetector(
-                          child: Icon(CupertinoIcons.map_pin),
-                          onTap: () => onPinTap(point),
+                          child: const Icon(Icons.local_gas_station),
+                          // When user taps pin on map we navigate to price view and pass station id.
+                          onTap: () => Navigator.of(context)
+                              .pushNamed('/prices', arguments: station.id),
                         )))
                 .toList()),
       ],
